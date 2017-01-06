@@ -77,7 +77,7 @@ class Station(object):
         if self._clean_data is None:
             data = (self.rawdata.rename(columns=self._columns())
                                 .drop([0], axis=0)
-                                .assign(site_name=lambda df: df.agency_cd + df.site_no)
+                                .assign(site_name=lambda df: str(df.agency_cd) + str(df.site_no))
                                 .drop(['agency_cd', 'site_no'], axis=1)
                                 .set_index(['site_name', 'datetime', 'tz_cd'])
             )
