@@ -1,3 +1,4 @@
+from matplotlib import pyplot
 import pandas as pd
 
 from .io import get_raw_txt, read_nwis, _make_url
@@ -6,13 +7,17 @@ from .io import get_raw_txt, read_nwis, _make_url
 class Station(object):
     def __init__(self, site, params, start, end, savepath='data'):
         self.site = site
-        self.params = params
+
+        if not isinstance(params, list):
+            self.params = [params]
+        else:
+            self.params = params
         self.start = start
         self.end = end
         self.savepath = savepath
 
-        self.url = _make_url(site, params, start, end)
-        self.path = get_raw_txt(site, params, start, end, savepath)
+        self.url = _make_url(site, self.params, start, end)
+        self.path = get_raw_txt(site, self.params, start, end, savepath)
 
         self._skiprows = None
         self._rawdata = None
@@ -77,9 +82,13 @@ class Station(object):
         if self._clean_data is None:
             data = (self.rawdata.rename(columns=self._columns())
                                 .drop([0], axis=0)
-                                .assign(site_name=lambda df: str(df.agency_cd) + str(df.site_no))
+                                .assign(site_name=lambda df: df.agency_cd.astype(str) + df.site_no.astype(str))
+                                .assign(datetime=lambda df: df.datetime.apply(lambda dt: pd.Timestamp(dt)))
                                 .drop(['agency_cd', 'site_no'], axis=1)
                                 .set_index(['site_name', 'datetime', 'tz_cd'])
             )
+
+            for numeric in [a for a in self._columns().values() if 'Qual' not in a]:
+                data[numeric] = pd.to_numeric(data[numeric])
 
         return data
