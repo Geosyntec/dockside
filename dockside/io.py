@@ -5,9 +5,13 @@ import pandas as pd
 
 def _make_params(paramlist):
 
+    if not isinstance(paramlist, list):
+        paramlist = [paramlist]
     param_dict = {
         'flow': 'cb_00060=on&',
         'temp': 'cb_00010=on&',
+        'stage': 'cb_00065=on&',
+        'precip': 'cb_00045=on&'
     }
 
     params = ''
@@ -17,7 +21,7 @@ def _make_params(paramlist):
     return '?' + params
 
 def _make_url(site, params, start, end):
-    urlstr = (r'http://nwis.waterdata.usgs.gov/usa/nwis/uv/{}'
+    urlstr = (r'https://nwis.waterdata.usgs.gov/nwis/uv/{}'
               r'format=rdb&site_no={}&period=&begin_date={}&end_date={}')
 
     paramlist = _make_params(params)
@@ -45,6 +49,6 @@ def get_raw_txt(site, params, start, end, path):
 def read_nwis(site, params, start, end, skiprows, path='data'):
     path = get_raw_txt(site, params, start, end, path)
 
-    df = pd.read_csv(path, sep='\t', skiprows=skiprows)
+    df = pd.read_csv(path, sep='\t', skiprows=skiprows, parse_dates=[2])
 
     return df
