@@ -103,4 +103,3 @@ class Station(object):
             self._clean_data = data
 
         return self._clean_data
-
