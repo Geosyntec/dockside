@@ -1,53 +1,71 @@
 from pathlib import Path
-from six.moves.urllib.request import urlopen
 
+import requests
 import pandas as pd
 
-def _make_params(paramlist):
 
-    if not isinstance(paramlist, list):
-        paramlist = [paramlist]
-    param_dict = {
-        'flow': 'cb_00060=on&',
-        'temp': 'cb_00010=on&',
-        'stage': 'cb_00065=on&',
-        'precip': 'cb_00045=on&'
+def fetch_nwis(site, start, end, daily=False, **kwargs):
+    dtfmt = '%Y-%m-%d'
+    url_base = "https://nwis.waterservices.usgs.gov/nwis/{}".format('dv' if daily else 'iv')
+    url_params = {
+        "format": kwargs.pop('format', 'json'),
+        "sites": site,
+        "startDT": pd.Timestamp(start).strftime(dtfmt),
+        "endDT": pd.Timestamp(end).strftime(dtfmt),
+        **kwargs
     }
 
-    params = ''
-    for p in paramlist:
-        params += param_dict[p]
+    return requests.get(url_base, params=url_params)
 
-    return '?' + params
 
-def _make_url(site, params, start, end):
-    urlstr = (r'https://nwis.waterdata.usgs.gov/nwis/uv/{}'
-              r'format=rdb&site_no={}&period=&begin_date={}&end_date={}')
+def _expand_columns(df, names, sep='_'):
+    newcols = df.columns.str.split(sep, expand=True)
+    return (
+        df.set_axis(newcols, axis='columns', inplace=False)
+          .rename_axis(names, axis='columns')
+    )
 
-    paramlist = _make_params(params)
 
-    url = urlstr.format(paramlist, site, start, end)
-    return url
+def _parse_ts(ts, daily):
+    param = ts['variable']['variableName']
+    if daily:
+        stat = ts['variable']['options']['option'][0]['value']
+    else:
+        stat = None
 
-def get_raw_txt(site, params, start, end, path):
+    col_levels = {
+        False: ['param', 'var'],
+        True: ['param', 'stat', 'var']
+    }
+    sep = 'xxxxx'
 
-    folder = Path(path)
-    if not folder.exists():
-        folder.mkdir(exist_ok=True, parents=True)
+    return (
+        pd.DataFrame(ts['values'][0]['value'])
+            .rename(columns=lambda c: '_orig_' + c)
+            .assign(datetime=lambda df: pd.to_datetime(df['_orig_dateTime']))
+            .assign(qual=lambda df: df['_orig_qualifiers'].map(lambda x: ','.join(x)))
+            .assign(value=lambda df: df['_orig_value'].astype(float))
+            .loc[:, lambda df: df.columns.map(lambda c: not c.startswith('_orig'))]
+            .set_index('datetime')
+            .rename(columns=lambda c: sep.join(filter(lambda x: bool(x), [param, stat, c])))
+            .rename_axis('var', axis='columns')
+            .pipe(_expand_columns, col_levels[daily], sep=sep)
+    )
 
-    full_path = folder / ('_'.join([site, *params, start, end]) + '.txt')
-    url = _make_url(site, params, start, end)
 
-    if not full_path.exists():
-        with full_path.open('wb') as openfile:
-            response = urlopen(url)
-            content = response.read()
-            openfile.write(content)
+def read_nwis(site_json, daily=False):
+    all_ts = site_json['value']['timeSeries']
+    if len(all_ts) > 0:
+        df = pd.concat([
+            _parse_ts(ts, daily=daily)
+            for ts in all_ts
+        ], axis='columns')
 
-    return full_path
+        return df
 
-def read_nwis(site, params, start, end, skiprows, path='data'):
-    path = get_raw_txt(site, params, start, end, path)
-    df = pd.read_csv(path, sep='\t', skiprows=skiprows, parse_dates=[2])
 
-    return df
+def read_cache(fpath, daily=False):
+    header = [0, 1]
+    if daily:
+        header.append(2)
+    return pd.read_csv(fpath, parse_dates=[0], header=header, index_col=[0])
