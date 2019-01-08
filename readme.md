@@ -1,9 +1,10 @@
 # dockside
+
 Download NWIS data without too much fuss
 
 ## Installation
 
-```
+```bash
 pip install git+https://github.com/Geosyntec/dockside.git
 ```
 

@@ -1,0 +1,26 @@
+# .coveragerc to control coverage.py
+[run]
+source = dockside
+branch = True
+include = dockside/*.py
+omit =
+    dockside/tests/util.py
+    dockside/tests/__init__.py
+
+[report]
+include = dockside/*.py
+ignore_errors = True
+omit =
+    dockside/tests/util.py
+    dockside/tests/__init__.py
+
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
