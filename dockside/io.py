@@ -5,6 +5,42 @@ import pandas as pd
 
 
 def fetch_nwis(site, start, end, daily=False, **kwargs):
+    """ Fetch JSON data from NWIS
+
+    Parameters
+    ----------
+    site : int or string
+        Site ID number from NWIS. E.g, 14211500 for Johnson Creek in
+        Portland, OR
+    start, end : string or date-like
+        Some form of date representation for the start and end of the NWIS
+        observations you'd like to download
+    daily : bool (default is False)
+        Toggles downloading daily (True) or instanteous values (False, default)
+
+    Additional Parameters
+    ---------------------
+    All additional keyword arguments are passed directly to the NWIS API.
+
+    Returns
+    -------
+    request
+        A request object representing the API call to fetch the data.
+
+    Examples
+    --------
+    >>> import json
+    >>> from tempfile import TemporaryDirectory
+    >>> from pathlib import Path
+    >>> from dockside.io import fetch_nwis, read_nwis
+    >>> r = fetch_nwis(14211500, '2018-01-01', '2018-06-30', daily=False)
+    >>> with TemporaryDirectory() as td:
+    ...     fpath = Path(td) / 'JCreek_flow.json'
+    ...     with fpath.open('w') as fp:
+    ...         json.dump(r.json(), fp)
+
+    """
+
     dtfmt = '%Y-%m-%d'
     url_base = "https://nwis.waterservices.usgs.gov/nwis/{}".format('dv' if daily else 'iv')
     url_params = {
@@ -19,6 +55,10 @@ def fetch_nwis(site, start, end, daily=False, **kwargs):
 
 
 def _expand_columns(df, names, sep='_'):
+    """
+    Splits string column labels into tuples
+    """
+
     newcols = df.columns.str.split(sep, expand=True)
     return (
         df.set_axis(newcols, axis='columns', inplace=False)
@@ -27,6 +67,10 @@ def _expand_columns(df, names, sep='_'):
 
 
 def _parse_ts(ts, daily):
+    """
+    Parses a single `timeSeries` object in an NWIS JSON response in a dataframe
+    """
+
     param = ts['variable']['variableName']
     if daily:
         stat = ts['variable']['options']['option'][0]['value']
@@ -54,6 +98,28 @@ def _parse_ts(ts, daily):
 
 
 def read_nwis(site_json, daily=False):
+    """ Read an NWIS JSON response to a pandas Dataframe
+
+    Parameters
+    ----------
+    site_json : json-like
+        JSON response from an API call to NWIS
+    daily : bool (default is False)
+        Set to True if you're parsing daily values or False (default) if they
+        they are instanteous values.
+
+    Returns
+    -------
+    pandas.DataFrame
+
+    Examples
+    --------
+    >>> from dockside.io import fetch_nwis, read_nwis
+    >>> r = fetch_nwis(14211500, '2018-01-01', '2018-06-30', daily=True)
+    >>> df = read_nwis(r.json(), daily=True)
+
+    """
+
     all_ts = site_json['value']['timeSeries']
     if len(all_ts) > 0:
         df = pd.concat([
@@ -65,6 +131,33 @@ def read_nwis(site_json, daily=False):
 
 
 def read_cache(fpath, daily=False):
+    """ Reads a previouly cached dataframe created with `read_nwis`
+
+    Parameters
+    ----------
+    fpath : path-like
+        File path to the cached data
+    daily : bool (default is False)
+        Set to True if you're parsing daily values or False (default) if they
+        they are instanteous values.
+
+    Returns
+    -------
+    pandas.DataFrame
+
+    Examples
+    --------
+    >>> from tempfile import TemporaryDirectory
+    >>> from pathlib import Path
+    >>> from dockside.io import fetch_nwis, read_nwis, read_cache
+    >>> r = fetch_nwis(14211500, '2018-01-01', '2018-06-30', daily=True)
+    >>> with TemporaryDirectory() as td:
+    ...     fpath = Path(td) / 'cached_flow.csv'
+    ...     df1 = read_nwis(r.json(), daily=True)
+    ...     df1.to_csv(fpath)
+    ...     df2 = read_cache(fpath, daily=True)
+    """
+
     header = [0, 1]
     if daily:
         header.append(2)

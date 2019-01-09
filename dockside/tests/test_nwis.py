@@ -31,8 +31,8 @@ def station():
     (True, '14211500_20181001_thru_20181030_daily.csv'),
     (False, '14211500_20181001_thru_20181030_insta.csv')
 ])
-def test_station_make_fpath(station, daily, expected):
-    assert station.make_fpath(daily) == station.savepath / expected
+def test_station__make_fpath(station, daily, expected):
+    assert station._make_fpath(daily) == station.savepath / expected
 
 
 @patch.object(nwis, 'fetch_nwis', return_value=FakeResponse())

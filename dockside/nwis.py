@@ -6,6 +6,10 @@ from .io import fetch_nwis, read_nwis, read_cache
 
 
 class Station(object):
+    """
+
+    """
+
     def __init__(self, site, start, end, savepath='data'):
         self.site = site
         self.start = Timestamp(start)
@@ -17,7 +21,7 @@ class Station(object):
         self._daily_data = None
         self._insta_data = None
 
-    def make_fpath(self, daily):
+    def _make_fpath(self, daily):
         datefmt = '%Y%m%d'
         suffix = 'daily' if daily else 'insta'
         fname = "_".join([
@@ -56,7 +60,7 @@ class Station(object):
         return self._insta_data
 
     def get_data(self, daily=False, save=False, force=False):
-        fpath = self.make_fpath(daily=daily)
+        fpath = self._make_fpath(daily=daily)
         if not fpath.exists() or force:
             df = read_nwis(self.site, self.start, self.end, daily=daily)
             if save:
