@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from six.moves.urllib.request import urlopen
 
 import pandas as pd
@@ -31,15 +31,15 @@ def _make_url(site, params, start, end):
 
 def get_raw_txt(site, params, start, end, path):
 
-    if not os.path.exists(path):
-        os.makedirs(path)
+    folder = Path(path)
+    if not folder.exists():
+        folder.mkdir(exist_ok=True, parents=True)
 
-    filename = '_'.join([site, *params, start, end]) + '.txt'
-    full_path = os.path.join(path, filename)
+    full_path = folder / ('_'.join([site, *params, start, end]) + '.txt')
     url = _make_url(site, params, start, end)
 
-    if not os.path.exists(full_path):
-        with open(full_path, 'wb') as openfile:
+    if not full_path.exists():
+        with full_path.open('wb') as openfile:
             response = urlopen(url)
             content = response.read()
             openfile.write(content)
@@ -48,7 +48,6 @@ def get_raw_txt(site, params, start, end, path):
 
 def read_nwis(site, params, start, end, skiprows, path='data'):
     path = get_raw_txt(site, params, start, end, path)
-
     df = pd.read_csv(path, sep='\t', skiprows=skiprows, parse_dates=[2])
 
     return df
