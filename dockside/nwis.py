@@ -6,7 +6,18 @@ from .io import fetch_nwis, read_nwis, read_cache
 
 
 class Station(object):
-    """
+    """ USGS Station and download helpers
+
+    Parameters
+    ----------
+    site : int, string, or sequence
+        Site ID number from NWIS. E.g, site = 14211500 or site = '14211500' for
+        Johnson Creek in Portland, OR. This can also be a list-like object for
+        multiple sites (experimental).
+    start, end : string or date-like
+        Start and end dates for the period of interest.
+    savepath : path-like
+        Path to where data would be saved when using the `get_data` method.
 
     """
 
@@ -60,7 +71,33 @@ class Station(object):
         return self._insta_data
 
     def get_data(self, daily=False, save=False, force=False):
+        """
+        Fetch and save data for the site.
+
+        Parameters
+        ----------
+        daily : bool (default False)
+            Toggles fetching either instaneous (False) or daily values (True).
+        save : bool (defaut False)
+            Toggles saving the downloaded data to `site.savepath`
+        force : bool (defaut False)
+            If True and the data has already been downloaded and save, this
+            will force the redownloading of the data.
+
+        Returns
+        -------
+        pandas.DataFrame
+
+        Note
+        ----
+        Unless readying from a cache, this method *always* redownloads the data,
+        even with multiple calls, instead of relying on the `daily_data` and
+        `insta_data` properties of the class.
+
+        """
+
         fpath = self._make_fpath(daily=daily)
+
         if not fpath.exists() or force:
             df = read_nwis(self.site, self.start, self.end, daily=daily)
             if save:

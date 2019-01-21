@@ -9,9 +9,10 @@ def fetch_nwis(site, start, end, daily=False, **kwargs):
 
     Parameters
     ----------
-    site : int or string
-        Site ID number from NWIS. E.g, 14211500 for Johnson Creek in
-        Portland, OR
+    site : int, string, or sequence
+        Site ID number from NWIS. E.g, site = 14211500 or site = '14211500' for
+        Johnson Creek in Portland, OR. This can also be a list-like object for
+        multiple sites (experimental).
     start, end : string or date-like
         Some form of date representation for the start and end of the NWIS
         observations you'd like to download
