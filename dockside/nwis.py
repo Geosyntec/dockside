@@ -100,4 +100,7 @@ class Station(object):
             for numeric in [a for a in self._columns().values() if 'Qual' not in a]:
                 self._clean_data[numeric] = pd.to_numeric(self._clean_data[numeric])
 
+            self._clean_data = data
+
         return self._clean_data
+
