@@ -26,52 +26,61 @@ class Station(object):
         self.__parse_header = None
 
     @property
+    def has_anything(self):
+        return self.path.exists() and (self.path.stat().st_size > 0)
+
+    @property
+    def has_data(self):
+        return self.rawdata is not None and self.rawdata.shape[0] > 0
+
+    @property
     def _parse_header(self):
-        if self.__parse_header is None:
-            with open(self.path, 'r') as openfile:
+        if self.has_anything and self.__parse_header is None:
+            with self.path.open('r') as openfile:
                 header = ''
                 for n, line in enumerate(openfile):
                     header += line
                     if '#' not in line:
                         break
-            self.__parse_header = (header, n)
+                self.__parse_header = (header, n)
         return self.__parse_header
 
     @property
     def header(self):
-        if self._header is None:
+        if self._parse_header and self._header is None:
             self._header = self._parse_header[0]
         return self._header
 
     @property
     def skiprows(self):
-        if self._skiprows is None:
+        if self._parse_header and self._skiprows is None:
             self._skiprows = self._parse_header[1]
         return self._skiprows
 
     def _columns(self, start='# Data provided for site',
-        end='# Data-value qualification codes included'):
+                 end='# Data-value qualification codes included'):
 
         cols = []
-        append = False
-        for n, line in enumerate(self.header.split('\n')):
-            if start in line:
-                append = True
-            if end in line:
-                append = False
+        if self.has_anything:
+            append = False
+            for n, line in enumerate(self.header.split('\n')):
+                if start in line:
+                    append = True
+                if end in line:
+                    append = False
 
-            if append:
-                cols.append(line)
+                if append:
+                    cols.append(line)
 
-        cols = cols[2:-1]
-        cols = [[__ for __ in _.strip('#').split(' ') if __ != ''] for _ in cols]
-        cols = {'_'.join(_[:2]):' '.join(_[2:]) for _ in cols}
-        cols.update({a + '_cd': 'Qual ' + b for a, b in cols.items()})
+            cols = cols[2:-1]
+            cols = [[__ for __ in _.strip('#').split(' ') if __ != ''] for _ in cols]
+            cols = {'_'.join(_[:2]):' '.join(_[2:]) for _ in cols}
+            cols.update({a + '_cd': 'Qual ' + b for a, b in cols.items()})
         return cols
 
     @property
     def rawdata(self):
-        if self._rawdata is None:
+        if self.has_anything and self._rawdata is None:
             data = read_nwis(self.site, self.params, self.start,
                 self.end, self.skiprows, path=self.savepath)
             self._rawdata = data
@@ -79,8 +88,8 @@ class Station(object):
 
     @property
     def clean_data(self):
-        if self._clean_data is None:
-            data = (self.rawdata.rename(columns=self._columns())
+        if self.rawdata is not None and self.has_data:
+            self._clean_data = (self.rawdata.rename(columns=self._columns())
                                 .drop([0], axis=0)
                                 .assign(site_name=lambda df: df.agency_cd.astype(str) + df.site_no.astype(str))
                                 .assign(datetime=lambda df: df.datetime.apply(lambda dt: pd.Timestamp(dt)))
@@ -89,8 +98,9 @@ class Station(object):
             )
 
             for numeric in [a for a in self._columns().values() if 'Qual' not in a]:
-                data[numeric] = pd.to_numeric(data[numeric])
+                self._clean_data[numeric] = pd.to_numeric(self._clean_data[numeric])
 
             self._clean_data = data
 
         return self._clean_data
+
