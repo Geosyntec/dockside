@@ -9,21 +9,21 @@ DESCRIPTION = ("dockside: A python utility to download United States "
     "Geological Survey (USGS) National Water Information System (NWIS) data")
 LONG_DESCRIPTION = DESCRIPTION
 NAME = "dockside"
-VERSION = "0.0.1"
+VERSION = "0.1.0"
 AUTHOR = "Lucas Nguyen (Geosyntec Consultants)"
 AUTHOR_EMAIL = "lnguyen@geosyntec.com"
 URL = "https://github.com/Geosyntec/pynwis"
 DOWNLOAD_URL = "https://github.com/Geosyntec/pynwis/archive/master.zip"
 LICENSE = "BSD 3-clause"
-PLATFORMS = "Python 2.7, 3.4 and later."
+PLATFORMS = "Python 3.6 and later."
 CLASSIFIERS = [
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Intended Audience :: Science/Research",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
 ]
 INSTALL_REQUIRES = ['pandas']
 PACKAGE_DATA = {
