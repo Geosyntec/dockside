@@ -17,11 +17,6 @@ class FakeResponse:
 
 
 @pytest.fixture
-def response():
-    return FakeResponse()
-
-
-@pytest.fixture
 def station():
     with TemporaryDirectory() as datadir:
         yield nwis.Station(14211500, '2018-10-01', '2018-10-30', savepath=datadir)
