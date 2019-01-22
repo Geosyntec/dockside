@@ -1,0 +1,39 @@
+language: python
+
+matrix:
+  include:
+    - python: 3.7
+      language: python
+      sudo: required
+      dist: xenial
+      env:
+        - COVERAGE=false
+        - ARGS=""
+    - python: 3.6
+      env:
+        - COVERAGE=true
+        - ARGS="--strict"
+
+before_install:
+  - wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - conda update --yes conda
+
+install:
+  - conda create --name=test python=$TRAVIS_PYTHON_VERSION nomkl --channel=conda-forge --yes
+  - source activate test
+  - conda install pandas requests pytest pytest-cov pytest-pep8 coverage docopt --channel=conda-forge --yes
+  - pip install codecov
+  - pip install .
+  - conda list
+
+script:
+  - coverage run --source dockside check_dockside.py --verbose ${ARGS}
+
+after_success:
+  - if [ ${COVERAGE} = true ]; then
+      coverage report -m;
+      codecov;
+    fi

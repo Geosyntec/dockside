@@ -1,106 +1,107 @@
-from matplotlib import pyplot
-import pandas as pd
+from pathlib import Path
 
-from .io import get_raw_txt, read_nwis, _make_url
+from pandas import Timestamp
+
+from .io import fetch_nwis, read_nwis, read_cache
 
 
 class Station(object):
-    def __init__(self, site, params, start, end, savepath='data'):
+    """ USGS Station and download helpers
+
+    Parameters
+    ----------
+    site : int, string, or sequence
+        Site ID number from NWIS. E.g, site = 14211500 or site = '14211500' for
+        Johnson Creek in Portland, OR. This can also be a list-like object for
+        multiple sites (experimental).
+    start, end : string or date-like
+        Start and end dates for the period of interest.
+    savepath : path-like
+        Path to where data would be saved when using the `get_data` method.
+
+    """
+
+    def __init__(self, site, start, end, savepath='data'):
         self.site = site
+        self.start = Timestamp(start)
+        self.end = Timestamp(end)
+        self.savepath = Path('.' or savepath)
 
-        if not isinstance(params, list):
-            self.params = [params]
+        self._daily_json = None
+        self._insta_json = None
+        self._daily_data = None
+        self._insta_data = None
+
+    def _make_fpath(self, daily):
+        datefmt = '%Y%m%d'
+        suffix = 'daily' if daily else 'insta'
+        fname = "_".join([
+            f"{self.site}",
+            self.start.strftime(datefmt),
+            'thru',
+            self.end.strftime(datefmt),
+            suffix,
+        ])
+        return self.savepath / (fname + '.csv')
+
+    @property
+    def daily_json(self):
+        if self._daily_json is None:
+            self._daily_json = fetch_nwis(self.site, self.start, self.end,
+                                          daily=True).json()
+        return self._daily_json
+
+    @property
+    def insta_json(self):
+        if self._insta_json is None:
+            self._insta_json = fetch_nwis(self.site, self.start, self.end,
+                                          daily=False).json()
+        return self._insta_json
+
+    @property
+    def daily_data(self):
+        if self._daily_data is None:
+            self._daily_data = read_nwis(self.daily_json, daily=True)
+        return self._daily_data
+
+    @property
+    def insta_data(self):
+        if self._insta_data is None:
+            self._insta_data = read_nwis(self.insta_json, daily=False)
+        return self._insta_data
+
+    def get_data(self, daily=False, save=False, force=False):
+        """
+        Fetch and save data for the site.
+
+        Parameters
+        ----------
+        daily : bool (default False)
+            Toggles fetching either instaneous (False) or daily values (True).
+        save : bool (defaut False)
+            Toggles saving the downloaded data to `site.savepath`
+        force : bool (defaut False)
+            If True and the data has already been downloaded and save, this
+            will force the redownloading of the data.
+
+        Returns
+        -------
+        pandas.DataFrame
+
+        Note
+        ----
+        Unless readying from a cache, this method *always* redownloads the data,
+        even with multiple calls, instead of relying on the `daily_data` and
+        `insta_data` properties of the class.
+
+        """
+
+        fpath = self._make_fpath(daily=daily)
+
+        if not fpath.exists() or force:
+            df = read_nwis(self.site, self.start, self.end, daily=daily)
+            if save:
+                df.to_csv(fpath, encoding='utf-8')
         else:
-            self.params = params
-        self.start = start
-        self.end = end
-        self.savepath = savepath
-
-        self.url = _make_url(site, self.params, start, end)
-        self.path = get_raw_txt(site, self.params, start, end, savepath)
-
-        self._skiprows = None
-        self._rawdata = None
-        self._clean_data = None
-        self._header = None
-        self.__parse_header = None
-
-    @property
-    def has_anything(self):
-        return self.path.exists() and (self.path.stat().st_size > 0)
-
-    @property
-    def has_data(self):
-        return self.rawdata is not None and self.rawdata.shape[0] > 0
-
-    @property
-    def _parse_header(self):
-        if self.has_anything and self.__parse_header is None:
-            with self.path.open('r') as openfile:
-                header = ''
-                for n, line in enumerate(openfile):
-                    header += line
-                    if '#' not in line:
-                        break
-                self.__parse_header = (header, n)
-        return self.__parse_header
-
-    @property
-    def header(self):
-        if self._parse_header and self._header is None:
-            self._header = self._parse_header[0]
-        return self._header
-
-    @property
-    def skiprows(self):
-        if self._parse_header and self._skiprows is None:
-            self._skiprows = self._parse_header[1]
-        return self._skiprows
-
-    def _columns(self, start='# Data provided for site',
-                 end='# Data-value qualification codes included'):
-
-        cols = []
-        if self.has_anything:
-            append = False
-            for n, line in enumerate(self.header.split('\n')):
-                if start in line:
-                    append = True
-                if end in line:
-                    append = False
-
-                if append:
-                    cols.append(line)
-
-            cols = cols[2:-1]
-            cols = [[__ for __ in _.strip('#').split(' ') if __ != ''] for _ in cols]
-            cols = {'_'.join(_[:2]):' '.join(_[2:]) for _ in cols}
-            cols.update({a + '_cd': 'Qual ' + b for a, b in cols.items()})
-        return cols
-
-    @property
-    def rawdata(self):
-        if self.has_anything and self._rawdata is None:
-            data = read_nwis(self.site, self.params, self.start,
-                self.end, self.skiprows, path=self.savepath)
-            self._rawdata = data
-        return self._rawdata
-
-    @property
-    def clean_data(self):
-        if self.rawdata is not None and self.has_data:
-            self._clean_data = (self.rawdata.rename(columns=self._columns())
-                                .drop([0], axis=0)
-                                .assign(site_name=lambda df: df.agency_cd.astype(str) + df.site_no.astype(str))
-                                .assign(datetime=lambda df: df.datetime.apply(lambda dt: pd.Timestamp(dt)))
-                                .drop(['agency_cd', 'site_no'], axis=1)
-                                .set_index(['site_name', 'datetime', 'tz_cd'])
-            )
-
-            for numeric in [a for a in self._columns().values() if 'Qual' not in a]:
-                self._clean_data[numeric] = pd.to_numeric(self._clean_data[numeric])
-
-            self._clean_data = data
-
-        return self._clean_data
-
+            df = read_cache(fpath, daily=daily)
+        return df
