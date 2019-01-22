@@ -1,5 +1,8 @@
 # dockside
 
+[![Build Status](https://travis-ci.org/Geosyntec/dockside.svg?branch=master)](https://travis-ci.org/Geosyntec/dockside)
+[![codecov](https://codecov.io/gh/Geosyntec/dockside/branch/master/graph/badge.svg)](https://codecov.io/gh/Geosyntec/dockside)
+
 Download NWIS data without too much fuss
 
 ## Installation
