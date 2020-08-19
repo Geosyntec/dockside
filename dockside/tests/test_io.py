@@ -206,8 +206,8 @@ def daily_ts_2():
 
 
 @pytest.mark.parametrize(('daily', 'url'), [
-    (True, 'https://nwis.waterservices.usgs.gov/nwis/dv/?format=json&sites=08071280&startDT=2012-10-01&endDT=2012-12-01'),
-    (False, 'https://nwis.waterservices.usgs.gov/nwis/iv/?format=json&sites=08071280&startDT=2012-10-01&endDT=2012-12-01')
+    (True, 'https://nwis.waterservices.usgs.gov/nwis/dv?format=json&sites=08071280&startDT=2012-10-01&endDT=2012-12-01'),
+    (False, 'https://nwis.waterservices.usgs.gov/nwis/iv?format=json&sites=08071280&startDT=2012-10-01&endDT=2012-12-01')
 ])
 def test_fetch_nwis(daily, url):
     site = '08071280'
