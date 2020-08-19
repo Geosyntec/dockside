@@ -10,24 +10,21 @@ except ImportError:
     pytest = None
 
 
-@requires(pytest, 'pytest')
+@requires(pytest, "pytest")
 def test(*args):
-    options = [resource_filename('dockside', '')]
+    options = [resource_filename("dockside", "")]
     options.extend(list(args))
     return pytest.main(options)
 
 
-@requires(pytest, 'pytest')
+@requires(pytest, "pytest")
 def teststrict(*args):
-    options = [
-        '--doctest-modules',
-        *list(args)
-    ]
+    options = ["--doctest-modules", *list(args)]
     return test(*list(set(options)))
 
 
-@requires(pytest, 'pytest')
+@requires(pytest, "pytest")
 def test_nowarnings(*args):
     with warnings.catch_warnings():
-        warnings.simplefilter('error')
+        warnings.simplefilter("error")
         return teststrict(*args)
