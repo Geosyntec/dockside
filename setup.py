@@ -25,7 +25,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
 ]
-INSTALL_REQUIRES = ['pandas']
+INSTALL_REQUIRES = ['pandas', 'requests']
 PACKAGE_DATA = {
 }
 
