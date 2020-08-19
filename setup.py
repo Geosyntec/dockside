@@ -5,8 +5,10 @@
 import os
 from setuptools import setup, find_packages
 
-DESCRIPTION = ("dockside: A python utility to download United States "
-    "Geological Survey (USGS) National Water Information System (NWIS) data")
+DESCRIPTION = (
+    "dockside: A python utility to download United States "
+    "Geological Survey (USGS) National Water Information System (NWIS) data"
+)
 LONG_DESCRIPTION = DESCRIPTION
 NAME = "dockside"
 VERSION = "0.1.1"
@@ -22,13 +24,12 @@ CLASSIFIERS = [
     "Programming Language :: Python",
     "Intended Audience :: Science/Research",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7',
-    'Programming Language :: Python :: 3.8',
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
 ]
-INSTALL_REQUIRES = ['pandas', 'requests']
-PACKAGE_DATA = {
-}
+INSTALL_REQUIRES = ["pandas", "requests"]
+PACKAGE_DATA = {}
 
 setup(
     name=NAME,

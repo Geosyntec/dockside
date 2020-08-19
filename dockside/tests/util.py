@@ -9,12 +9,14 @@ def raises(error):
     if error:
         return pytest.raises(error)
     else:
+
         @contextmanager
         def not_raises():
             try:
                 yield
             except Exception as e:
                 raise e
+
         return not_raises()
 
 
@@ -23,8 +25,12 @@ def requires(module, modulename):
         @wraps(function)
         def inner_wrapper(*args, **kwargs):
             if module is None:
-                raise RuntimeError("{} required for `{}`".format(modulename, function.__name__))
+                raise RuntimeError(
+                    "{} required for `{}`".format(modulename, function.__name__)
+                )
             else:
                 return function(*args, **kwargs)
+
         return inner_wrapper
+
     return outer_wrapper

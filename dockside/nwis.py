@@ -21,11 +21,11 @@ class Station(object):
 
     """
 
-    def __init__(self, site, start, end, savepath='data'):
+    def __init__(self, site, start, end, savepath="data"):
         self.site = site
         self.start = Timestamp(start)
         self.end = Timestamp(end)
-        self.savepath = Path('.' or savepath)
+        self.savepath = Path("." or savepath)
 
         self._daily_json = None
         self._insta_json = None
@@ -33,29 +33,33 @@ class Station(object):
         self._insta_data = None
 
     def _make_fpath(self, daily):
-        datefmt = '%Y%m%d'
-        suffix = 'daily' if daily else 'insta'
-        fname = "_".join([
-            f"{self.site}",
-            self.start.strftime(datefmt),
-            'thru',
-            self.end.strftime(datefmt),
-            suffix,
-        ])
-        return self.savepath / (fname + '.csv')
+        datefmt = "%Y%m%d"
+        suffix = "daily" if daily else "insta"
+        fname = "_".join(
+            [
+                f"{self.site}",
+                self.start.strftime(datefmt),
+                "thru",
+                self.end.strftime(datefmt),
+                suffix,
+            ]
+        )
+        return self.savepath / (fname + ".csv")
 
     @property
     def daily_json(self):
         if self._daily_json is None:
-            self._daily_json = fetch_nwis(self.site, self.start, self.end,
-                                          daily=True).json()
+            self._daily_json = fetch_nwis(
+                self.site, self.start, self.end, daily=True
+            ).json()
         return self._daily_json
 
     @property
     def insta_json(self):
         if self._insta_json is None:
-            self._insta_json = fetch_nwis(self.site, self.start, self.end,
-                                          daily=False).json()
+            self._insta_json = fetch_nwis(
+                self.site, self.start, self.end, daily=False
+            ).json()
         return self._insta_json
 
     @property
@@ -101,7 +105,7 @@ class Station(object):
         if not fpath.exists() or force:
             df = read_nwis(self.site, self.start, self.end, daily=daily)
             if save:
-                df.to_csv(fpath, encoding='utf-8')
+                df.to_csv(fpath, encoding="utf-8")
         else:
             df = read_cache(fpath, daily=daily)
         return df
