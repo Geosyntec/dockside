@@ -206,8 +206,8 @@ def daily_ts_2():
 
 
 @pytest.mark.parametrize(('daily', 'url'), [
-    (True, 'https://nwis.waterservices.usgs.gov/nwis/dv/?format=json&sites=08071280&startDT=2012-10-01&endDT=2012-12-01'),
-    (False, 'https://nwis.waterservices.usgs.gov/nwis/iv/?format=json&sites=08071280&startDT=2012-10-01&endDT=2012-12-01')
+    (True, 'https://nwis.waterservices.usgs.gov/nwis/dv?format=json&sites=08071280&startDT=2012-10-01&endDT=2012-12-01'),
+    (False, 'https://nwis.waterservices.usgs.gov/nwis/iv?format=json&sites=08071280&startDT=2012-10-01&endDT=2012-12-01')
 ])
 def test_fetch_nwis(daily, url):
     site = '08071280'
@@ -224,7 +224,7 @@ def test__expand_columns():
 
     res_cols = pandas.MultiIndex(
         levels=[['A', 'B'], ['a', 'b', 'c']],
-        labels=[[0, 0, 1, 1], [0, 1, 0, 2]],
+        codes=[[0, 0, 1, 1], [0, 1, 0, 2]],
         names=['top', 'bottom']
     )
     expected = pandas.DataFrame(x, columns=res_cols)
@@ -252,7 +252,7 @@ def test__parse_ts_insta(insta_ts_1):
         }
     })
     result = io._parse_ts(insta_ts_1, daily=False)
-    pdtest.assert_frame_equal(result, expected, check_names=False)
+    pdtest.assert_frame_equal(result, expected, check_names=False, check_index_type=False)
 
 
 def test__parse_ts_daily(daily_ts_1):
@@ -313,7 +313,7 @@ def test_read_nwis_insta(insta_ts_1, insta_ts_2):
     })
     site_json = {'value': {'timeSeries': [insta_ts_1, insta_ts_2]}}
     result = io.read_nwis(site_json, daily=False)
-    pdtest.assert_frame_equal(result, expected, check_names=False)
+    pdtest.assert_frame_equal(result, expected, check_names=False, check_index_type=False)
 
 
 def test_read_nwis_daily(daily_ts_1, daily_ts_2):
