@@ -20,7 +20,7 @@ def test(*args):
 @requires(pytest, 'pytest')
 def teststrict(*args):
     options = [
-        '--pep8', '--doctest-modules',
+        '--doctest-modules',
         *list(args)
     ]
     return test(*list(set(options)))
