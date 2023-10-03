@@ -6,7 +6,7 @@ from .io import fetch_nwis, read_nwis, read_cache
 
 
 class Station(object):
-    """ USGS Station and download helpers
+    """USGS Station and download helpers
 
     Parameters
     ----------
