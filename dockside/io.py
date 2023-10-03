@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def fetch_nwis(site, start, end, daily=False, **kwargs):
-    """ Fetch JSON data from NWIS
+    """Fetch JSON data from NWIS
 
     Parameters
     ----------
@@ -63,9 +63,7 @@ def _expand_columns(df, names, sep="_"):
     """
 
     newcols = df.columns.str.split(sep, expand=True)
-    return df.set_axis(newcols, axis="columns").rename_axis(
-        names, axis="columns"
-    )
+    return df.set_axis(newcols, axis="columns").rename_axis(names, axis="columns")
 
 
 def _parse_ts(ts, daily):
@@ -97,7 +95,7 @@ def _parse_ts(ts, daily):
 
 
 def read_nwis(site_json, daily=False):
-    """ Read an NWIS JSON response to a pandas Dataframe
+    """Read an NWIS JSON response to a pandas Dataframe
 
     Parameters
     ----------
@@ -127,7 +125,7 @@ def read_nwis(site_json, daily=False):
 
 
 def read_cache(fpath, daily=False):
-    """ Reads a previouly cached dataframe created with `read_nwis`
+    """Reads a previouly cached dataframe created with `read_nwis`
 
     Parameters
     ----------
