@@ -6,7 +6,7 @@ from pandas import Timestamp
 
 from unittest import mock
 import pytest
-import pandas.util.testing as pdtest
+import pandas.testing as pdtest
 
 from dockside import io
 

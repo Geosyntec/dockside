@@ -63,7 +63,7 @@ def _expand_columns(df, names, sep="_"):
     """
 
     newcols = df.columns.str.split(sep, expand=True)
-    return df.set_axis(newcols, axis="columns", inplace=False).rename_axis(
+    return df.set_axis(newcols, axis="columns").rename_axis(
         names, axis="columns"
     )
 
