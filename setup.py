@@ -13,7 +13,6 @@ LONG_DESCRIPTION = DESCRIPTION
 NAME = "dockside"
 VERSION = "0.1.2"
 AUTHOR = "Lucas Nguyen (Geosyntec Consultants)"
-AUTHOR_EMAIL = "lnguyen@geosyntec.com"
 URL = "https://github.com/Geosyntec/dockside"
 DOWNLOAD_URL = "https://github.com/Geosyntec/dockside/archive/master.zip"
 LICENSE = "BSD 3-clause"
@@ -36,7 +35,6 @@ setup(
     name=NAME,
     version=VERSION,
     author=AUTHOR,
-    author_email=AUTHOR_EMAIL,
     url=URL,
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
