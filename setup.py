@@ -3,7 +3,18 @@
 # Usage: python setup.py install
 #
 import os
+import re
 from setuptools import setup, find_packages
+
+
+def search(substr: str, content: str):
+    found = re.search(substr, content)
+    return found.group(1) if found else ""
+
+with open("dockside/__init__.py", encoding="utf8") as f:
+    content = f.read()
+    version = search(r'__version__ = "(.*?)"', content)
+    author = search(r'__author__ = "(.*?)"', content)
 
 DESCRIPTION = (
     "dockside: A python utility to download United States "
@@ -11,8 +22,8 @@ DESCRIPTION = (
 )
 LONG_DESCRIPTION = DESCRIPTION
 NAME = "dockside"
-VERSION = "0.1.2"
-AUTHOR = "Lucas Nguyen (Geosyntec Consultants)"
+VERSION = version
+AUTHOR = author
 URL = "https://github.com/Geosyntec/dockside"
 DOWNLOAD_URL = "https://github.com/Geosyntec/dockside/archive/master.zip"
 LICENSE = "BSD 3-clause"
