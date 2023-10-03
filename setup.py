@@ -14,19 +14,20 @@ NAME = "dockside"
 VERSION = "0.1.2"
 AUTHOR = "Lucas Nguyen (Geosyntec Consultants)"
 AUTHOR_EMAIL = "lnguyen@geosyntec.com"
-URL = "https://github.com/Geosyntec/pynwis"
-DOWNLOAD_URL = "https://github.com/Geosyntec/pynwis/archive/master.zip"
+URL = "https://github.com/Geosyntec/dockside"
+DOWNLOAD_URL = "https://github.com/Geosyntec/dockside/archive/master.zip"
 LICENSE = "BSD 3-clause"
-PLATFORMS = "Python 3.6 and later."
+PLATFORMS = "Python 3.8 and later."
 CLASSIFIERS = [
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Intended Audience :: Science/Research",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 INSTALL_REQUIRES = ["pandas", "requests"]
 PACKAGE_DATA = {}
