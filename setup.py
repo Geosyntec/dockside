@@ -11,6 +11,7 @@ def search(substr: str, content: str):
     found = re.search(substr, content)
     return found.group(1) if found else ""
 
+
 with open("dockside/__init__.py", encoding="utf8") as f:
     content = f.read()
     version = search(r'__version__ = "(.*?)"', content)
