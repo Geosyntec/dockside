@@ -11,7 +11,7 @@ DESCRIPTION = (
 )
 LONG_DESCRIPTION = DESCRIPTION
 NAME = "dockside"
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 AUTHOR = "Lucas Nguyen (Geosyntec Consultants)"
 AUTHOR_EMAIL = "lnguyen@geosyntec.com"
 URL = "https://github.com/Geosyntec/pynwis"
